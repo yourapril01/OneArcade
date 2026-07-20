@@ -17,12 +17,6 @@ ADD_FROM_FW "pa3q" "system" "priv-app/SamsungSmartSuggestions"
 ADD_FROM_FW "pa3q" "system" "priv-app/Moments" 
 ADD_FROM_FW "pa3q" "system" "etc/sysconfig/moments.xml"
 
-# Environment adaptive display
-# rest of patches are in services.jar
-ADD_FROM_FW "pa3q" "system" "priv-app/EnvironmentAdaptiveDisplay" 
-FF "SUPPORT_COLOR_LENS" "TRUE" 
-
-
 # MFContents
 ADD_FROM_FW "pa3q" "system" "etc/mfcontents"
 ADD_FROM_FW "pa3q" "system" "priv-app/MFContents"
