@@ -16,6 +16,29 @@
 #
 
 # [
+_CHECK_NON_EMPTY_PARAM()
+{
+    if [ ! "$2" ]; then
+        echo -n -e '\033[0;31m' >&2
+
+        local STACK_SIZE="${#FUNCNAME[@]}"
+        if [[ "$STACK_SIZE" -gt "1" ]]; then
+            echo -n "(" >&2
+            if [[ "$STACK_SIZE" -gt "2" ]]; then
+                echo -n "${BASH_SOURCE[2]//$SRC_DIR\//}:${BASH_LINENO[1]}:" >&2
+            fi
+            echo -n "${FUNCNAME[1]}) " >&2
+        fi
+
+        echo -n "$1 is not set!" >&2
+        echo -e '\033[0m' >&2
+
+        return 1
+    fi
+
+    return 0
+}
+
 _GET_FILE_INODE()
 {
     local FILE_PATH="$1"
