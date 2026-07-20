@@ -18,8 +18,8 @@
 
 
 # ADB
-BPROP "system" "ro.adb.secure" "0"
-BPROP "vendor" "ro.adb.secure" "0"
+BPROP "system" "ro.adb.secure" "1"
+# BPROP "vendor" "ro.adb.secure" "0"
 						   					   
 
 ROM_BUILD_ID="$(GET_PROP "system" "ro.build.display.id")"
