@@ -84,6 +84,15 @@ BLOAT_TARGETS+=(
 SILENT REMOVE "product" "overlay/GmsConfigOverlaySearchSelector.apk"
 
 
+<<<<<<< HEAD
+=======
+# Remove Samsung Messages
+BLOAT_TARGETS+=("SamsungMessages")
+
+SILENT REMOVE "system" "etc/default-permissions/default-permissions-com.samsung.android.messaging.xml"
+SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.messaging.xml"
+
+>>>>>>> fcbb79d6 (Update Debloat.sh)
 #  FACTORY & TEST TOOLS (HwModuleTest)
 BLOAT_TARGETS+=(
     "Cameralyzer"
