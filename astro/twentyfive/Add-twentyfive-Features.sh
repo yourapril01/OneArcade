@@ -42,8 +42,8 @@ ADD_FROM_FW "pa3q" "system" "priv-app/OfflineLanguageModel_stub"
 FF "GENAI_SUPPORT_OFFLINE_LANGUAGEMODEL" "TRUE"
 
 # WiFi
-# ADD_FROM_FW "pa3q" "system" "app/WifiIntelligence"
-# ADD_FROM_FW "pa3q" "system" "app/WifiAiService"
+ ADD_FROM_FW "pa3q" "system" "app/WifiIntelligence"
+ ADD_FROM_FW "pa3q" "system" "app/WifiAiService"
 
 # Sketchbook
 ADD_FROM_FW "pa3q" "system" "app/SketchBook" 
@@ -102,9 +102,9 @@ ADD_FROM_FW "pa3q" "system" "etc/default-permissions"
 ADD_FROM_FW "pa3q" "system" "priv-app/BixbyInterpreter" 
 
 # Phone Packages
-# ADD_FROM_FW "pa3q" "system" "priv-app/SamsungInCallUI" 
-# ADD_FROM_FW "pa3q" "system" "priv-app/SamsungIntelliVoiceServices" 
-# ADD_FROM_FW "pa3q" "system" "priv-app/SamsungDialer" 
+ ADD_FROM_FW "pa3q" "system" "priv-app/SamsungInCallUI" 
+ ADD_FROM_FW "pa3q" "system" "priv-app/SamsungIntelliVoiceServices" 
+ ADD_FROM_FW "pa3q" "system" "priv-app/SamsungDialer" 
 
 # etc
 ADD_FROM_FW "pa3q" "system" "app/SmartCapture" 
