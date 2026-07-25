@@ -6,7 +6,9 @@
   - [r9s]Disable DVFS
   - [r9s]Drop Unstable Vulkan Driver Mod
   - [exy2100]Changed Custom kernel to Floppy
+  - Add Google Messages
   - Drop AdaptiveEnvirontmentDisplay
+  - Drop SamsungMessages
 
 ## About AstroROM
 
