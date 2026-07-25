@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 if ! GET_FEATURE DEVICE_USE_STOCK_BASE; then
     if GET_FEATURE SOURCE_HAVE_ESIM_SUPPORT; then
         if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
@@ -19,6 +20,11 @@ if ! GET_FEATURE DEVICE_USE_STOCK_BASE; then
         if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
         LOG_BEGIN "Device supports eSIM, adding blobs"
 
+=======
+if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
+    LOG_BEGIN "Device supports eSIM, adding blobs"
+    
+>>>>>>> 64ad3913 (Update Apply-Embedded-SIM-Patches.sh)
     ADD_FROM_FW "pa3q" "system" "priv-app/EsimKeyString"
     ADD_FROM_FW "pa3q" "system" "priv-app/EuiccService"
 
