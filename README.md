@@ -1,3 +1,12 @@
+## Bugs left to fix:
+  - USB things??
+  - [r9s]Raw Camera support doesnt patched correctly
+
+## Unnoficial Modded
+  - [r9s]Disable DVFS
+  - [r9s]Drop Unstable Vulkan Driver Mod
+  - [exy2100]Changed Custom kernel to Floppy
+  - Drop AdaptiveEnvirontmentDisplay
 
 ## About AstroROM
 
