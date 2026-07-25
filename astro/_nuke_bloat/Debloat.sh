@@ -84,7 +84,7 @@ SILENT REMOVE "product" "overlay/GmsConfigOverlaySearchSelector.apk"
 
 
 # Remove Samsung Messages
-BLOAT_TARGETS+=(SamsungMessages)
+BLOAT_TARGETS+=("SamsungMessages")
 
 SILENT REMOVE "system" "etc/default-permissions/default-permissions-com.samsung.android.messaging.xml"
 SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.messaging.xml"
