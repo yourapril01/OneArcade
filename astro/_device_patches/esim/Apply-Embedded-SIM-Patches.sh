@@ -1,5 +1,5 @@
 
-if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT == true; then
+if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
     LOG_BEGIN "Device supports eSIM, adding blobs"
     
     ADD_FROM_FW "pa3q" "system" "priv-app/EsimKeyString"
