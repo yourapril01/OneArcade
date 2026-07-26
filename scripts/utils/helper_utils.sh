@@ -104,7 +104,7 @@ HEX_PATCH()
     local TO="$3"
 
     if [ ! -f "$FILE" ]; then
-        LOGE "File not found: ${FILE//$WORKSPACE/}"
+        LOG_WARN "File not found: ${FILE//$WORKSPACE/}"
         return 1
     fi
 
@@ -115,12 +115,12 @@ HEX_PATCH()
     TO="$(tr "[:upper:]" "[:lower:]" <<< "$TO")"
 
     if ! xxd -p -c 0 "$FILE" | grep -q "$FROM"; then
-        LOGE "No \"$FROM\" match in ${FILE//$WORKSPACE/}"
+        LOG_WARN "No \"$FROM\" match in ${FILE//$WORKSPACE/}"
         return 1
     fi
 
     if [[ "$(echo -n "$FROM" | wc -c)" != "$(echo -n "$TO" | wc -c)" ]]; then
-        LOGE "Byte strings length must be equal"
+        LOG_WARN "Byte strings length must be equal"
         return 1
     fi
 
