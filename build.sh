@@ -190,8 +190,8 @@ _BUILD_ROM()
     fi
 
     LAYERS+=(
-        "$OBJECTIVE"
         "$PROJECT_DIR"
+        "$OBJECTIVE"
     )
 
     for LAYER in "${LAYERS[@]}"; do
