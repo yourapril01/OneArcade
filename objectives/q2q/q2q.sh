@@ -33,7 +33,7 @@ MODEL="SM-F926B"
 CSC="EUX"
 
 # Extra firmware (Optional) details for download
-EXTRA_MODEL="SM-S948B"
+EXTRA_MODEL="SM-S901B"
 EXTRA_CSC="EUX"
 
 # Output
