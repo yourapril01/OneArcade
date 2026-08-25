@@ -93,6 +93,47 @@ HEX_EDIT()
         return 1
     fi
 
+<<<<<<< HEAD
+=======
+HEX_PATCH()
+{
+    _CHECK_NON_EMPTY_PARAM "FILE" "$1" || return 1
+    _CHECK_NON_EMPTY_PARAM "FROM" "$2" || return 1
+    _CHECK_NON_EMPTY_PARAM "TO" "$3" || return 1
+
+    local FILE="$1"
+    local FROM="$2"
+    local TO="$3"
+
+    if [ ! -f "$FILE" ]; then
+        LOG_WARN "File not found: ${FILE//$WORKSPACE/}"
+        return 1
+    fi
+
+    FROM="${FROM// /}"
+    TO="${TO// /}"
+
+    FROM="$(tr "[:upper:]" "[:lower:]" <<< "$FROM")"
+    TO="$(tr "[:upper:]" "[:lower:]" <<< "$TO")"
+
+    if ! xxd -p -c 0 "$FILE" | grep -q "$FROM"; then
+        LOG_WARN "No \"$FROM\" match in ${FILE//$WORKSPACE/}"
+        return 1
+    fi
+
+    if [[ "$(echo -n "$FROM" | wc -c)" != "$(echo -n "$TO" | wc -c)" ]]; then
+        LOG_WARN "Byte strings length must be equal"
+        return 1
+    fi
+
+    LOG "- Patching \"$FROM\" to \"$TO\" in ${FILE//$WORKSPACE/}"
+    xxd -p -c 0 "$FILE" | sed "s/$FROM/$TO/" | xxd -r -p > "$FILE.tmp"
+    mv "$FILE.tmp" "$FILE"
+
+    return 0
+}
+
+>>>>>>> e085a7bb (utils:Refactored log on HEX_PATCH)
     # Normalize patterns to lowercase
     FROM_HEX=$(tr '[:upper:]' '[:lower:]' <<< "$FROM_HEX")
     TO_HEX=$(tr '[:upper:]' '[:lower:]' <<< "$TO_HEX")

@@ -1,3 +1,18 @@
+<<<<<<< HEAD
+=======
+## Bugs left to fix:
+  - USB things??
+  - Logout after login using google samsung account
+  - [r9s]Raw Camera support doesnt patched correctly
+
+## Unnoficial Modded
+  - [r9s]Disable SDHMS
+  - [r9s]Drop Unstable Vulkan Driver Mod
+  - [exy2100]Changed Custom kernel to Floppy
+  - Add Google Messages
+  - Drop AdaptiveEnvirontmentDisplay
+  - Drop SamsungMessages
+>>>>>>> fab25a5b (Update README.md)
 
 ## About AstroROM
 
