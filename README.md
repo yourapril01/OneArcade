@@ -1,5 +1,6 @@
 ## Bugs left to fix:
   - USB things??
+  - Logout after login using google samsung account
   - [r9s]Raw Camera support doesnt patched correctly
 
 ## Unnoficial Modded
