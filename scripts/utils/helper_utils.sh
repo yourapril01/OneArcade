@@ -93,8 +93,6 @@ HEX_EDIT()
         return 1
     fi
 
-<<<<<<< HEAD
-=======
 HEX_PATCH()
 {
     _CHECK_NON_EMPTY_PARAM "FILE" "$1" || return 1
@@ -133,7 +131,6 @@ HEX_PATCH()
     return 0
 }
 
->>>>>>> e085a7bb (utils:Refactored log on HEX_PATCH)
     # Normalize patterns to lowercase
     FROM_HEX=$(tr '[:upper:]' '[:lower:]' <<< "$FROM_HEX")
     TO_HEX=$(tr '[:upper:]' '[:lower:]' <<< "$TO_HEX")

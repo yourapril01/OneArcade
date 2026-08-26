@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 ## Bugs left to fix:
   - USB things??
   - Logout after login using google samsung account
@@ -12,7 +10,6 @@
   - Add Google Messages
   - Drop AdaptiveEnvirontmentDisplay
   - Drop SamsungMessages
->>>>>>> fab25a5b (Update README.md)
 
 ## About AstroROM
 

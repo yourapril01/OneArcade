@@ -1,33 +1,7 @@
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-if ! GET_FEATURE DEVICE_USE_STOCK_BASE; then
-    if GET_FEATURE SOURCE_HAVE_ESIM_SUPPORT; then
-        if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
-        LOG_END "No eSIM changes required"
-    else
-        LOG_BEGIN "Device does NOT support eSIM, removing blobs"
-            NUKE_BLOAT "EsimKeyString" "EuiccService"
-
-            REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.app.esimkeystring.xml"
-            REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.euicc.xml"
-            REMOVE "system" "etc/sysconfig/preinstalled-packages-com.samsung.android.app.esimkeystring.xml"
-            REMOVE "system" "etc/sysconfig/preinstalled-packages-com.samsung.euicc.xml"
-
-            FF "COMMON_CONFIG_EMBEDDED_SIM_SLOTSWITCH" ""
-        LOG_END "eSIM blobs removed"
-        fi
-    else
-        if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
-        LOG_BEGIN "Device supports eSIM, adding blobs"
-
-=======
-=======
->>>>>>> 64ad3913 (Update Apply-Embedded-SIM-Patches.sh)
 if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
     LOG_BEGIN "Device supports eSIM, adding blobs"
     
->>>>>>> 64ad3913 (Update Apply-Embedded-SIM-Patches.sh)
     ADD_FROM_FW "pa3q" "system" "priv-app/EsimKeyString"
     ADD_FROM_FW "pa3q" "system" "priv-app/EuiccService"
 
@@ -39,8 +13,20 @@ if GET_FEATURE DEVICE_HAVE_ESIM_SUPPORT; then
     FF_IF_DIFF "stock" "COMMON_CONFIG_EMBEDDED_SIM_SLOTSWITCH"
 
         LOG_END "eSIM blobs added"
+        
     else
-        LOG_END "No eSIM changes required"
-        fi
-    fi
+    LOG_BEGIN "Device doesnt supports eSIM, proceed to nuke eSIM blobs"
+    
+    SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.app.esimkeystring.xml"
+    SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.app.telephonyui.esimclient.xml"
+    SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.euicc.xml"
+    SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.euicc.mep.xml"
+    SILENT REMOVE "system" "etc/sysconfig/preinstalled-packages-com.samsung.android.app.esimkeystring.xml"
+    SILENT REMOVE "system" "etc/sysconfig/preinstalled-packages-com.samsung.euicc.xml"
+    SILENT REMOVE "system" "priv-app/EsimKeyString"
+    SILENT REMOVE "system" "priv-app/EuiccService"
+    SILENT REMOVE "system" "priv-app/EsimClient"
+    
+        LOG_END "No eSIM blobs left, success nuked eSIM support"
+
 fi
