@@ -90,7 +90,7 @@ SILENT REMOVE "system" "etc/default-permissions/default-permissions-com.samsung.
 SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.messaging.xml"
 
 #  FACTORY & TEST TOOLS (HwModuleTest)
-BLOAT_TARGETS+=(
+#BLOAT_TARGETS+=(
     "Cameralyzer"
     "FactoryAirCommandManager"
     "FactoryCameraFB"
@@ -102,9 +102,9 @@ BLOAT_TARGETS+=(
     "DRParser"
 )
 
-SILENT REMOVE "system" "etc/default-permissions/default-permissions-com.sec.factory.cameralyzer.xml"
-SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.providers.factory.xml"
-SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.sec.facatfunction.xml"
+#SILENT REMOVE "system" "etc/default-permissions/default-permissions-com.sec.factory.cameralyzer.xml"
+#SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.samsung.android.providers.factory.xml"
+#SILENT REMOVE "system" "etc/permissions/privapp-permissions-com.sec.facatfunction.xml"
 
 
 #  COVER SERVICES
