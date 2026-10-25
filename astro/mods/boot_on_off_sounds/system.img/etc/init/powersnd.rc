@@ -1,8 +1,3 @@
-
-on boot
-    setprop service.media.powersnd 1
-    start powersound
-
 on shutdown
     setprop service.media.powersnd 0
     start powersound
