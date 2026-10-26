@@ -1,0 +1,46 @@
+File res/xml/sec_software_info_settings.xml
+
+REPLACE <PreferenceScreen android:title="@string/device_info_software_title"
+                  settings:hierarchicalParentFragment="com.samsung.android.settings.deviceinfo.aboutphone.SecMyDeviceInfoFragment"
+                  settings:topLevelPreferenceKey="top_level_about_phone" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:settings="http://schemas.android.com/apk/res-auto">
+                  
+  <PreferenceScreen android:layout="@layout/logo"
+                    android:key="od_logo" />
+  <PreferenceCategory android:title="@string/rom_info"
+                      android:key="dummy_gen">
+    <Preference android:title="@string/rom_name"
+                android:key="rom_name"
+                android:summary="@string/rom_name_details"
+                style="?android:attr/preferenceInformationStyle" />
+    <Preference android:title="@string/rom_ver"
+                android:key="rom_ver"
+                android:summary="@string/rom_ver_details"
+                style="?android:attr/preferenceInformationStyle" />
+    <Preference android:title="@string/rom_date"
+                android:key="rom_date"
+                android:summary="@string/rom_date_details"
+                style="?android:attr/preferenceInformationStyle" />
+    <Preference android:title="@string/rom_developer"
+                android:key="rom_developer"
+                android:summary="@string/rom_developer_name"
+                style="?android:attr/preferenceInformationStyle" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/device_info"
+                      android:key="dummy_gen" />
+END
+
+FILE res/values/strings.xml
+
+REPLACE  <string name="zzz_lgt_password_wrong_pin_code2">After 3 incorrect PIN attempts, you have to enter the personal unlocking key (PUK).</string>
+
+  <string name="device_info">Device Information</string>
+  <string name="rom_date">Build Date</string>
+  <string name="rom_date_details">28-10-2026</string>
+  <string name="rom_developer">ROM Developer</string>
+  <string name="rom_developer_name">Indoapril01</string>
+  <string name="rom_info">Information About ROM</string>
+  <string name="rom_name">AstroROM Version</string>
+  <string name="rom_name_details">2.3.Remaster🌊</string>
+  <string name="rom_ver">ROM Status</string>
+  <string name="rom_ver_details">Release</string>
+END
