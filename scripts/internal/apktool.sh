@@ -1,76 +1,67 @@
 #!/usr/bin/env bash
 #
-#  Copyright (c) 2025 Sameer Al Sahab
+#  Copyright (c) 2026 yourapril01
 #  Licensed under the MIT License. See LICENSE file for details.
 #
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-#
 
-# Special Thanks to @BlackMesa123 for his help and hints on github issues
-
-# Sources:
-# https://github.com/iBotPeaches/Apktool/issues/3775
-# https://github.com/iBotPeaches/Apktool/pull/3879
-# https://github.com/SameerAlSahab/smali_patch/blob/main/smali_patch.py
-# https://github.com/iBotPeaches/Apktool/issues/1775
-
-DEFAULT_SDK="36"  #branch sixteen
+DEFAULT_SDK="36"  # branch sixteen
 
 PATCH_MARKER_FILE="$WORKSPACE/.patch_markers"
 
-DO_SIGN_APK="false"  # coz disabled apk signature verification on framework.jar as of now
+DO_SIGN_APK="false"
 CERT_PEM=""
 CERT_PK8=""
 
-DECOMPILE_RES=true
+DECOMPILE_RES="true"
+FRAMEWORK_DIR="$WORKSPACE/.framework"
 
 APK_TO_DECOMPILE_RES=(
     product_overlay.apk
-    #wallpaper-res.apk
-    #SecSettings.apk
-    #SystemUI.apk
+    # wallpaper-res.apk
+    SecSettings.apk
+    # SystemUI.apk
 )
 
 declare -A PATCH_CACHE
 
+GET_BUILD_TAG()
+{
+    local TAG=""
+    if [[ -f "$BUILD_PROP" ]]; then
+        TAG=$(BPROP "system" "ro.system.build.version.incremental" | cut -d'=' -f2 | tr -d '[:space:]')
+        [[ -z "$TAG" ]] && TAG=$(BPROP "system" "ro.build.version.incremental" | cut -d'=' -f2 | tr -d '[:space:]')
+    fi
+    [[ -z "$TAG" ]] && TAG="$DEFAULT_SDK"
+    echo "$TAG"
+}
+
 INSTALL_FRAMEWORK()
 {
     local FRAMEWORK_APK="$WORKSPACE/system/system/framework/framework-res.apk"
-    local SDK="$DEFAULT_SDK"
+    local BUILD_TAG=$(GET_BUILD_TAG)
 
-    if [[ -f "$BUILD_PROP" ]]; then
-        local PROP_SDK=$(BPROP "system" "ro.build.version.sdk" | cut -d'=' -f2 | tr -d '[:space:]')
-        [[ -n "$PROP_SDK" ]] && SDK="$PROP_SDK"
-    fi
+    mkdir -p "$FRAMEWORK_DIR"
 
-    local INSTALLED="$FRAMEWORK_DIR/1-${SDK}.apk"
+    local INSTALLED="$FRAMEWORK_DIR/1-${BUILD_TAG}.apk"
     if [[ -f "$INSTALLED" ]]; then
-        echo "$SDK"
+        echo "$BUILD_TAG"
         return 0
     fi
 
     [[ ! -f "$FRAMEWORK_APK" ]] && ERROR_EXIT "framework-res.apk missing"
 
-    java -jar "$PREBUILTS/apktool/apktool.jar" if -p "$FRAMEWORK_DIR" -t "$SDK" "$FRAMEWORK_APK" > /dev/null || \
+    LOG_INFO "Installing framework with tag: $BUILD_TAG"
+
+    java -jar "$PREBUILTS/apktool/apktool.jar" if -p "$FRAMEWORK_DIR" -t "$BUILD_TAG" "$FRAMEWORK_APK" > /dev/null 2>&1 || \
         ERROR_EXIT "Failed to install framework"
 
-    echo "$SDK"
+    echo "$BUILD_TAG"
 }
 
 FIND_TARGET()
 {
     local FILE_NAME="$1"
 
-    # JAR files are at system/framework
     if [[ "$FILE_NAME" == *.jar ]]; then
         local SYSTEM_DIR=$(GET_PARTITION_PATH "system") || true
         if [[ -n "$SYSTEM_DIR" && -f "$SYSTEM_DIR/framework/$FILE_NAME" ]]; then
@@ -79,14 +70,12 @@ FIND_TARGET()
         fi
     fi
 
-    # As of now , we dont need partition paths except them
     if [[ "$FILE_NAME" == *.apk ]]; then
         local PARTITIONS=("system" "system_ext" "product")
         for PART in "${PARTITIONS[@]}"; do
             local PART_DIR=$(GET_PARTITION_PATH "$PART") || continue
             [[ -z "$PART_DIR" || ! -d "$PART_DIR" ]] && continue
 
-            # For now we take app and priv-app cause preload and hidden apps are useless.
             local SUBDIRS=("app" "priv-app" "overlay")
             for SUBDIR in "${SUBDIRS[@]}"; do
                 [[ ! -d "$PART_DIR/$SUBDIR" ]] && continue
@@ -119,7 +108,13 @@ DECOMPILE()
 
     LOG_INFO "Decompiling $NAME"
 
-    local SDK=$(INSTALL_FRAMEWORK)
+    local BUILD_TAG=$(INSTALL_FRAMEWORK)
+    local SDK="$DEFAULT_SDK"
+    if [[ -f "$BUILD_PROP" ]]; then
+        local PROP_SDK=$(BPROP "system" "ro.build.version.sdk" | cut -d'=' -f2 | tr -d '[:space:]')
+        [[ -n "$PROP_SDK" ]] && SDK="$PROP_SDK"
+    fi
+
     local API="$SDK"
     local TEMP_DEX=$(mktemp)
     local DEX_MAGIC=""
@@ -132,17 +127,14 @@ DECOMPILE()
 
     mkdir -p "$WORK_DIR/.meta"
     echo "$API" > "$WORK_DIR/.meta/api"
-    echo "$SDK" > "$WORK_DIR/.meta/sdk"
+    echo "$BUILD_TAG" > "$WORK_DIR/.meta/sdk"
 
-    # DEX v041 Container Bypass (OneUI 8+). I saw OneUI8+ uses dex 041 for services.jar
+    # DEX v041 Container Bypass (OneUI 8+)
     if [[ "$DEX_MAGIC" == "30343100" ]]; then
-
-        # Decompile with --no-src
         java -jar "$PREBUILTS/apktool/apktool.jar" d -api "$API" -f -j "$USABLE_THREADS" \
-            -o "$WORK_DIR" -p "$FRAMEWORK_DIR" -t "$SDK" -s "$FILE" > /dev/null 2>&1 || \
+            -o "$WORK_DIR" -p "$FRAMEWORK_DIR" -t "$BUILD_TAG" -s "$FILE" > /dev/null 2>&1 || \
             ERROR_EXIT "Decompile failed"
 
-        # Baksmali each dex parts
         local PART=1
         while true; do
             local INPUT="$FILE/classes.dex"
@@ -162,39 +154,25 @@ DECOMPILE()
         done
         rm -f "$WORK_DIR/classes"*.dex
     else
+        # Standard flags: Always append -t $BUILD_TAG and -p $FRAMEWORK_DIR
+        local FLAGS=("-f" "--no-debug-info" "-j" "$USABLE_THREADS" "-o" "$WORK_DIR" "-p" "$FRAMEWORK_DIR" "-t" "$BUILD_TAG")
 
-        # Standard flags
-        local FLAGS=("-f" "-j" "$USABLE_THREADS" "-o" "$WORK_DIR" "-p" "$FRAMEWORK_DIR"  )
-
-        # Resource decompile for listed APKs we declared on top
+        # Resource decompile check
         local IN_LIST="false"
         for ITEM in "${APK_TO_DECOMPILE_RES[@]}"; do
             [[ "$ITEM" == "$NAME" ]] && IN_LIST="true" && break
         done
 
+        # Append -r (skip resources) ONLY if resource decompilation is disabled or app is not whitelisted
         if ! GET_FEATURE "DECOMPILE_RES" || [[ "$IN_LIST" != "true" ]]; then
             FLAGS+=("-r")
         fi
 
-        # --no-debug-info is equals to baksmali --ac false and other flags and similarly use .locals instead of registers , so we can skip baksmali here.
-        java -jar "$PREBUILTS/apktool/apktool.jar" d --no-debug-info "${FLAGS[@]}" "$FILE" > /dev/null 2>&1 || \
+        java -jar "$PREBUILTS/apktool/apktool.jar" d "${FLAGS[@]}" "$FILE" > /dev/null 2>&1 || \
             ERROR_EXIT "Decompile failed"
-
-
-        # Baksmali all DEX files
-        #find "$WORK_DIR" -maxdepth 1 -name "*.dex" | while read -r DEX; do
-        #    local D_NAME=$(basename "$DEX")
-        #    local OUT="smali"
-        #    [[ "$D_NAME" != "classes.dex" ]] && OUT="smali_${D_NAME%.dex}"
-
-        #   java -jar "$PREBUILTS/smali/baksmali.jar" d -a "$API" --ac false --di false \
-        #        -j "$USABLE_THREADS" -l -o "$WORK_DIR/$OUT" "$DEX" > /dev/null 2>&1
-
-        #   rm -f "$DEX"
-        #done
     fi
 
-    # Extract extra resources for JARs (Issue found on OneUI6+)
+    # Extract extra resources for JARs (Android 14+)
     if [[ "$EXT" == "jar" ]] && unzip -l "$FILE" | grep -q "debian.mime.types"; then
         mkdir -p "$WORK_DIR/__res__"
         unzip -qo "$FILE" "res/*" -d "$WORK_DIR/__res__"
@@ -213,11 +191,9 @@ BUILD()
         FILE="$WORKSPACE/$FILE"
     fi
 
-    local NAME
-    NAME=$(basename "$FILE")
+    local NAME=$(basename "$FILE")
     local EXT="${NAME##*.}"
-    local DIR
-    DIR=$(dirname "$FILE")
+    local DIR=$(dirname "$FILE")
     local WORK_DIR="$DIR/${NAME}_decompiled"
     local DIST_DIR="$WORK_DIR/dist"
     local BUILT_FILE="$DIST_DIR/$NAME"
@@ -226,10 +202,7 @@ BUILD()
 
     LOG_INFO "Building $NAME"
 
-    local API="$DEFAULT_SDK"
-    if [[ -f "$WORK_DIR/.meta/api" ]]; then
-        API=$(cat "$WORK_DIR/.meta/api")
-    fi
+    local BUILD_TAG=$(GET_BUILD_TAG)
 
     mkdir -p "$DIST_DIR"
 
@@ -241,21 +214,17 @@ BUILD()
     )
 
     if [[ "$EXT" == "apk" ]]; then
-        # -c: Copies original META-INF and manifest (Preserves original structure)
         APKTOOL_FLAGS+=("-c")
     fi
 
     local BUILD_OUTPUT
     if ! BUILD_OUTPUT=$(java -jar "$PREBUILTS/apktool/apktool.jar" "${APKTOOL_FLAGS[@]}" "$WORK_DIR" 2>&1); then
         LOG_WARN "Recompilation failed. Check logs below:"
-
-        # We dont show I: information of progress until get an error. Same thing -q flag do
         echo "$BUILD_OUTPUT" | sed '/^I:/d'
         return 1
     fi
 
     if [[ "$EXT" == "apk" ]]; then
-        # Sign the apk if turned on
         if [[ "$DO_SIGN_APK" == "true" ]]; then
             LOG_INFO "Signing APK..."
             local UNSIGNED="$DIST_DIR/${NAME}.unsigned"
@@ -267,8 +236,6 @@ BUILD()
             fi
             rm -f "$UNSIGNED"
         else
-            # Zipalign APKs
-            # https://developer.android.com/tools/zipalign
             local ALIGNED="$DIST_DIR/aligned.apk"
             if zipalign -p -f 4 "$BUILT_FILE" "$ALIGNED" > /dev/null 2>&1; then
                 mv -f "$ALIGNED" "$BUILT_FILE"
@@ -278,7 +245,6 @@ BUILD()
         fi
     fi
 
-    # Add missing resources for JARs [Android14+ bug] See DECOMPILE function for more info.
     if [[ "$EXT" == "jar" && -d "$WORK_DIR/__res__" ]]; then
         (cd "$WORK_DIR/__res__" && zip -qr "$BUILT_FILE" .)
     fi
@@ -293,7 +259,6 @@ BUILD()
     return 0
 }
 
-# For instance , patch failed we will start from scratch
 RESTORE_TARGET()
 {
     local TARGET_NAME="$1"
@@ -304,8 +269,6 @@ RESTORE_TARGET()
     if [[ "$TARGET_NAME" == *.jar ]]; then
         SOURCE="$SOURCE_DIR/system/system/framework/$TARGET_NAME"
     elif [[ "$TARGET_NAME" == *.apk ]]; then
-
-        # As of now , we dont need partition paths except them
         local PARTITIONS=("system/system" "system_ext" "product")
         for PART in "${PARTITIONS[@]}"; do
             [[ ! -d "$SOURCE_DIR/$PART" ]] && continue
@@ -323,7 +286,6 @@ RESTORE_TARGET()
     cp -f "$SOURCE" "$CURRENT_PATH" || ERROR_EXIT "Failed to revert changes for $TARGET_NAME"
 
     LOG_END "Restored $TARGET_NAME"
-
     return 0
 }
 
@@ -347,11 +309,9 @@ BUILD_ALL()
     done < <(find "$WORKSPACE" -type d -name "*_decompiled" -print0)
 
     [[ "$FOUND" == "false" ]] && return 0
-
     return 0
 }
 
-#https://github.com/iBotPeaches/Apktool/issues/3775
 GET_DEX_API()
 {
     local DEX_FILE="$1"
@@ -434,12 +394,9 @@ _APKTOOL_PATCH()
         for P_DIR in "${PATCH_DIRS[@]}"; do
             while IFS= read -r -d '' P; do
                 PATCHES+=("$P")
-            done < <(find "$P_DIR" -maxdepth 1 \( -name "*.patch" -o -name "*.smalipatch" \) -type f -print0)
+            done < <(find "$P_DIR" -maxdepth 1 \( -name "*.patch" -o -name "*.smalipatch" -o -name "*.xmlpatch" \) -type f -print0)
         done
         IFS=$'\n' PATCHES=($(sort -V <<<"${PATCHES[*]}")); unset IFS
-
-        # Apply our patches
-        # TODO: show error logs only , wil do later
 
         for P in "${PATCHES[@]}"; do
             local P_NAME=$(basename "$P")
@@ -448,13 +405,6 @@ _APKTOOL_PATCH()
             if [[ "$P_NAME" == *.patch ]]; then
                 (
                     cd "$WORK_DIR" || ERROR_EXIT "Cannot change directory to $WORK_DIR"
-
-                    # -p1: Strip one leading directory component from file paths.
-                    # -s: Work silently unless an error occurs. (Clean output)
-                    # -f: Force/Ignore bad Prereq patches, assume unreversed.
-                    # -l: Ignore white space changes (line endings, indentation) for better matching.
-                    # --dry-run: Test the patch without modifying any files.
-                    #
                     patch -p1 -s -f -l --dry-run < "$P" >/dev/null 2>&1
 
                     if [[ $? -eq 0 ]]; then
@@ -469,9 +419,32 @@ _APKTOOL_PATCH()
 
             elif [[ "$P_NAME" == *.smalipatch ]]; then
                 local SMALI_BIN="$PREBUILTS/smalipatch/smali_patch.py"
+
+                # Auto-resolve missing smali files across multi-dex folders (smali_classes2, etc.)
+                while read -r TARGET_SMALI; do
+                    [[ -z "$TARGET_SMALI" ]] && continue
+                    if [[ ! -f "$WORK_DIR/$TARGET_SMALI" ]]; then
+                        local REL_NAME=$(basename "$TARGET_SMALI")
+                        local FOUND_FILE=$(find "$WORK_DIR" -type f -name "$REL_NAME" -print -quit 2>/dev/null)
+                        if [[ -n "$FOUND_FILE" ]]; then
+                            local ACTUAL_REL_PATH="${FOUND_FILE#$WORK_DIR/}"
+                            echo "Redirecting $TARGET_SMALI -> $ACTUAL_REL_PATH"
+                            sed -i "s|$TARGET_SMALI|$ACTUAL_REL_PATH|g" "$P"
+                        fi
+                    fi
+                done < <(grep -oE 'smali[a-zA-Z0-9_/-]+\.smali' "$P" | sort -u)
+
                 python3 "$SMALI_BIN" "$WORK_DIR" "$P" || {
                     rm -rf "$WORK_DIR"
                     ERROR_EXIT "Smali patch failed for $P_NAME"
+                }
+
+            elif [[ "$P_NAME" == *.xmlpatch ]]; then
+                local XML_BIN="$PREBUILTS/smalipatch/xml_patch.py"
+
+                python3 "$XML_BIN" "$WORK_DIR" "$P" || {
+                    rm -rf "$WORK_DIR"
+                    ERROR_EXIT "XML patch failed for $P_NAME"
                 }
             fi
         done
