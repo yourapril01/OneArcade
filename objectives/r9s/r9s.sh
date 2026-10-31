@@ -29,8 +29,8 @@ STOCK_MODEL="SM-G990E"
 STOCK_CSC="THL"
 
 # Source firmware details for download
-MODEL="SM-G990E"
-CSC="THL"
+MODEL="SM-G9900"
+CSC="CHC"
 
 # Extra firmware (Optional) details for download
 EXTRA_MODEL=""
